@@ -3,26 +3,23 @@ package ui
 import "github.com/charmbracelet/lipgloss"
 
 var (
-	// Colors
-	colorBlue    = lipgloss.Color("#5C9DFF")
-	colorGreen   = lipgloss.Color("#5CFF9D")
-	colorYellow  = lipgloss.Color("#FFD75C")
-	colorRed     = lipgloss.Color("#FF5C5C")
-	colorDim     = lipgloss.Color("#666666")
-	colorWhite   = lipgloss.Color("#FFFFFF")
-	colorCyan    = lipgloss.Color("#5CFFFF")
-	colorMagenta = lipgloss.Color("#FF5CFF")
-	colorOrange  = lipgloss.Color("#FFA55C")
+	// Adaptive colors following charmbracelet/bubbles conventions
+	// Light/Dark pairs for terminal background adaptation
+	subtle = lipgloss.AdaptiveColor{Light: "#D9DCCF", Dark: "#383838"}
+	muted  = lipgloss.AdaptiveColor{Light: "#9B9B9B", Dark: "#626262"}
+	text   = lipgloss.AdaptiveColor{Light: "#1a1a1a", Dark: "#dddddd"}
+	accent = lipgloss.AdaptiveColor{Light: "#7571F9", Dark: "#7571F9"}
+	err    = lipgloss.AdaptiveColor{Light: "#FF5F87", Dark: "#FF5F87"}
 
 	// Status bar
 	statusBarStyle = lipgloss.NewStyle().
-			Background(lipgloss.Color("#333333")).
-			Foreground(colorWhite).
+			Background(subtle).
+			Foreground(text).
 			Padding(0, 1)
 
 	// Help bar
 	helpBarStyle = lipgloss.NewStyle().
-			Foreground(colorDim).
+			Foreground(muted).
 			Padding(0, 1)
 
 	// Badge base style
@@ -32,67 +29,67 @@ var (
 
 	// Event type badges
 	badgeSystem = badgeStyle.
-			Background(colorMagenta).
-			Foreground(lipgloss.Color("#000000"))
+			Background(muted).
+			Foreground(lipgloss.AdaptiveColor{Light: "#FFFFFF", Dark: "#000000"})
 
 	badgeUser = badgeStyle.
-			Background(colorYellow).
-			Foreground(lipgloss.Color("#000000"))
+			Background(text).
+			Foreground(lipgloss.AdaptiveColor{Light: "#FFFFFF", Dark: "#000000"})
 
 	badgeText = badgeStyle.
-			Background(colorWhite).
-			Foreground(lipgloss.Color("#000000"))
+			Background(lipgloss.AdaptiveColor{Light: "#FFFFFF", Dark: "#FFFFFF"}).
+			Foreground(lipgloss.AdaptiveColor{Light: "#000000", Dark: "#000000"})
 
 	badgeTool = badgeStyle.
-			Background(colorBlue).
-			Foreground(lipgloss.Color("#000000"))
+			Background(accent).
+			Foreground(lipgloss.AdaptiveColor{Light: "#FFFFFF", Dark: "#FFFFFF"})
 
 	badgeThinking = badgeStyle.
-			Background(colorDim).
-			Foreground(colorWhite)
+			Background(subtle).
+			Foreground(muted)
 
 	badgeResult = badgeStyle.
-			Background(colorOrange).
-			Foreground(lipgloss.Color("#000000"))
+			Background(muted).
+			Foreground(text)
 
 	badgeSuccess = badgeStyle.
-			Background(colorGreen).
-			Foreground(lipgloss.Color("#000000"))
+			Background(lipgloss.AdaptiveColor{Light: "#04B575", Dark: "#04B575"}).
+			Foreground(lipgloss.AdaptiveColor{Light: "#FFFFFF", Dark: "#000000"})
 
 	badgeError = badgeStyle.
-			Background(colorRed).
-			Foreground(colorWhite)
+			Background(err).
+			Foreground(lipgloss.AdaptiveColor{Light: "#FFFFFF", Dark: "#FFFFFF"})
 
 	badgeDefault = badgeStyle.
-			Background(lipgloss.Color("#444444")).
-			Foreground(colorWhite)
+			Background(subtle).
+			Foreground(text)
 
 	// Content styles
 	textStyle = lipgloss.NewStyle().
-			Foreground(colorWhite)
+			Foreground(text)
 
 	toolNameStyle = lipgloss.NewStyle().
-			Foreground(colorCyan).
+			Foreground(accent).
 			Bold(true)
 
 	toolInputStyle = lipgloss.NewStyle().
-			Foreground(colorDim)
+			Foreground(muted)
 
 	thinkingStyle = lipgloss.NewStyle().
-			Foreground(colorDim).
+			Foreground(muted).
 			Italic(true)
 
 	resultStyle = lipgloss.NewStyle().
-			Foreground(colorOrange)
+			Foreground(text)
 
 	successStyle = lipgloss.NewStyle().
-			Foreground(colorGreen)
+			Foreground(lipgloss.AdaptiveColor{Light: "#04B575", Dark: "#04B575"})
 
 	errorStyle = lipgloss.NewStyle().
-			Foreground(colorRed)
+			Foreground(err)
 
 	usageStyle = lipgloss.NewStyle().
-			Foreground(colorDim)
+			Foreground(muted)
 
 	// Event container
 	eventStyle = lipgloss.NewStyle().
@@ -101,9 +98,9 @@ var (
 
 	// Follow mode indicator
 	followOnStyle = lipgloss.NewStyle().
-			Foreground(colorGreen).
+			Foreground(lipgloss.AdaptiveColor{Light: "#04B575", Dark: "#04B575"}).
 			Bold(true)
 
 	followOffStyle = lipgloss.NewStyle().
-			Foreground(colorDim)
+			Foreground(muted)
 )
