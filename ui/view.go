@@ -31,15 +31,13 @@ func renderEvent(event *model.DisplayEvent, width int) string {
 }
 
 func renderSystem(event *model.DisplayEvent) string {
-	badge := badgeSystem.Render("system")
 	if event.Text != "" {
-		return eventStyle.Render(fmt.Sprintf("%s\n  %s", badge, usageStyle.Render(event.Text)))
+		return eventStyle.Render(usageStyle.Render(event.Text))
 	}
-	return eventStyle.Render(badge)
+	return ""
 }
 
 func renderText(event *model.DisplayEvent) string {
-	badge := badgeText.Render("text")
 	text := event.Text
 	if len(text) > 300 {
 		text = text[:300] + "..."
@@ -50,49 +48,45 @@ func renderText(event *model.DisplayEvent) string {
 		lines = lines[:5]
 		lines = append(lines, "...")
 	}
-	text = strings.Join(lines, "\n  ")
-	return eventStyle.Render(fmt.Sprintf("%s\n  %s", badge, textStyle.Render(text)))
+	text = strings.Join(lines, "\n")
+	return eventStyle.Render(textStyle.Render(text))
 }
 
 func renderThinking(event *model.DisplayEvent) string {
-	badge := badgeThinking.Render("thinking")
 	text := event.Text
 	if len(text) > 200 {
 		text = text[:200] + "..."
 	}
 	text = strings.TrimSpace(text)
-	return eventStyle.Render(fmt.Sprintf("%s\n  %s", badge, thinkingStyle.Render(text)))
+	return eventStyle.Render(thinkingStyle.Render(text))
 }
 
 func renderToolUse(event *model.DisplayEvent) string {
-	badge := badgeTool.Render("tool_use")
 	tool := event.ToolUse
 	if tool == nil {
-		return eventStyle.Render(badge)
+		return ""
 	}
 
-	toolName := toolNameStyle.Render(tool.Name)
+	toolName := toolNameStyle.Render("● " + tool.Name)
 	input := tool.Input
 	if len(input) > 150 {
 		input = input[:150] + "..."
 	}
-	return eventStyle.Render(fmt.Sprintf("%s %s\n  %s", badge, toolName, toolInputStyle.Render(input)))
+	return eventStyle.Render(fmt.Sprintf("%s\n  %s", toolName, toolInputStyle.Render(input)))
 }
 
 func renderUser(event *model.DisplayEvent) string {
-	badge := badgeUser.Render("user")
 	text := event.Text
 	if len(text) > 200 {
 		text = text[:200] + "..."
 	}
 	text = strings.TrimSpace(text)
-	return eventStyle.Render(fmt.Sprintf("%s\n  %s", badge, textStyle.Render(text)))
+	return eventStyle.Render(fmt.Sprintf("> %s", textStyle.Render(text)))
 }
 
 func renderToolResult(event *model.DisplayEvent) string {
-	badge := badgeResult.Render("result")
 	if event.ToolResult == nil {
-		return eventStyle.Render(badge)
+		return ""
 	}
 
 	content := event.ToolResult.Content
@@ -105,24 +99,22 @@ func renderToolResult(event *model.DisplayEvent) string {
 		lines = append(lines, "...")
 	}
 	content = strings.Join(lines, "\n  ")
-	return eventStyle.Render(fmt.Sprintf("%s\n  %s", badge, resultStyle.Render(content)))
+	return eventStyle.Render(fmt.Sprintf("  %s", resultStyle.Render(content)))
 }
 
 func renderResult(event *model.DisplayEvent) string {
-	badge := badgeSuccess.Render("done")
-	return eventStyle.Render(fmt.Sprintf("%s %s", badge, successStyle.Render(event.Text)))
+	return eventStyle.Render(successStyle.Render("✓ " + event.Text))
 }
 
 func renderUnknown(event *model.DisplayEvent) string {
-	badge := badgeDefault.Render(event.Type)
 	if event.Text != "" {
 		text := event.Text
 		if len(text) > 100 {
 			text = text[:100] + "..."
 		}
-		return eventStyle.Render(fmt.Sprintf("%s\n  %s", badge, text))
+		return eventStyle.Render(text)
 	}
-	return eventStyle.Render(badge)
+	return ""
 }
 
 // renderStatusBar renders the top status bar
