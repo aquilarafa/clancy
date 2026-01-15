@@ -121,11 +121,19 @@ func (w *Watcher) readAvailable(reader *bufio.Reader) {
 		line, err := reader.ReadBytes('\n')
 		if err != nil {
 			if err == io.EOF {
-				// If we got partial line, put it back
+				// If we got a partial line at EOF, emit it (file may be complete)
 				if len(line) > 0 {
-					// Wait a bit and try again (partial line)
-					time.Sleep(10 * time.Millisecond)
-					continue
+					// Trim any trailing whitespace
+					if line[len(line)-1] == '\r' {
+						line = line[:len(line)-1]
+					}
+					if len(line) > 0 {
+						select {
+						case w.lines <- line:
+						case <-w.done:
+							return
+						}
+					}
 				}
 				return
 			}
