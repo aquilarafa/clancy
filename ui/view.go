@@ -11,33 +11,34 @@ import (
 func renderEvent(event *model.DisplayEvent, width int) string {
 	switch event.Type {
 	case "system":
-		return renderSystem(event)
+		return renderSystem(event, width)
 	case "assistant":
 		if event.ToolUse != nil {
-			return renderToolUse(event)
+			return renderToolUse(event, width)
 		}
-		return renderText(event)
+		return renderText(event, width)
 	case "thinking":
-		return renderThinking(event)
+		return renderThinking(event, width)
 	case "tool_result":
-		return renderToolResult(event)
+		return renderToolResult(event, width)
 	case "user":
-		return renderUser(event)
+		return renderUser(event, width)
 	case "result":
-		return renderResult(event)
+		return renderResult(event, width)
 	default:
-		return renderUnknown(event)
+		return renderUnknown(event, width)
 	}
 }
 
-func renderSystem(event *model.DisplayEvent) string {
+func renderSystem(event *model.DisplayEvent, width int) string {
 	if event.Text != "" {
-		return eventStyle.Render(usageStyle.Render(event.Text))
+		contentWidth := width - 4 // account for padding
+		return eventStyle.Width(width).Render(usageStyle.Width(contentWidth).Render(event.Text))
 	}
 	return ""
 }
 
-func renderText(event *model.DisplayEvent) string {
+func renderText(event *model.DisplayEvent, width int) string {
 	text := event.Text
 	if len(text) > 300 {
 		text = text[:300] + "..."
@@ -49,19 +50,21 @@ func renderText(event *model.DisplayEvent) string {
 		lines = append(lines, "...")
 	}
 	text = strings.Join(lines, "\n")
-	return eventStyle.Render(textStyle.Render(text))
+	contentWidth := width - 4
+	return eventStyle.Width(width).Render(textStyle.Width(contentWidth).Render(text))
 }
 
-func renderThinking(event *model.DisplayEvent) string {
+func renderThinking(event *model.DisplayEvent, width int) string {
 	text := event.Text
 	if len(text) > 200 {
 		text = text[:200] + "..."
 	}
 	text = strings.TrimSpace(text)
-	return eventStyle.Render(thinkingStyle.Render(text))
+	contentWidth := width - 4
+	return eventStyle.Width(width).Render(thinkingStyle.Width(contentWidth).Render(text))
 }
 
-func renderToolUse(event *model.DisplayEvent) string {
+func renderToolUse(event *model.DisplayEvent, width int) string {
 	tool := event.ToolUse
 	if tool == nil {
 		return ""
@@ -72,19 +75,21 @@ func renderToolUse(event *model.DisplayEvent) string {
 	if len(input) > 150 {
 		input = input[:150] + "..."
 	}
-	return eventStyle.Render(fmt.Sprintf("%s\n  %s", toolName, toolInputStyle.Render(input)))
+	contentWidth := width - 6
+	return eventStyle.Width(width).Render(fmt.Sprintf("%s\n  %s", toolName, toolInputStyle.Width(contentWidth).Render(input)))
 }
 
-func renderUser(event *model.DisplayEvent) string {
+func renderUser(event *model.DisplayEvent, width int) string {
 	text := event.Text
 	if len(text) > 200 {
 		text = text[:200] + "..."
 	}
 	text = strings.TrimSpace(text)
-	return eventStyle.Render(fmt.Sprintf("> %s", textStyle.Render(text)))
+	contentWidth := width - 6
+	return eventStyle.Width(width).Render(fmt.Sprintf("> %s", textStyle.Width(contentWidth).Render(text)))
 }
 
-func renderToolResult(event *model.DisplayEvent) string {
+func renderToolResult(event *model.DisplayEvent, width int) string {
 	if event.ToolResult == nil {
 		return ""
 	}
@@ -99,20 +104,23 @@ func renderToolResult(event *model.DisplayEvent) string {
 		lines = append(lines, "...")
 	}
 	content = strings.Join(lines, "\n  ")
-	return eventStyle.Render(fmt.Sprintf("  %s", resultStyle.Render(content)))
+	contentWidth := width - 6
+	return eventStyle.Width(width).Render(fmt.Sprintf("  %s", resultStyle.Width(contentWidth).Render(content)))
 }
 
-func renderResult(event *model.DisplayEvent) string {
-	return eventStyle.Render(successStyle.Render("✓ " + event.Text))
+func renderResult(event *model.DisplayEvent, width int) string {
+	contentWidth := width - 4
+	return eventStyle.Width(width).Render(successStyle.Width(contentWidth).Render("✓ " + event.Text))
 }
 
-func renderUnknown(event *model.DisplayEvent) string {
+func renderUnknown(event *model.DisplayEvent, width int) string {
 	if event.Text != "" {
 		text := event.Text
 		if len(text) > 100 {
 			text = text[:100] + "..."
 		}
-		return eventStyle.Render(text)
+		contentWidth := width - 4
+		return eventStyle.Width(width).Render(textStyle.Width(contentWidth).Render(text))
 	}
 	return ""
 }
