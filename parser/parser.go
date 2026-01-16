@@ -116,7 +116,7 @@ func (p *Parser) ParseLine(line []byte) ([]*model.DisplayEvent, error) {
 		if event.Subtype == "success" {
 			events = append(events, &model.DisplayEvent{
 				Type:       "result",
-				Text:       fmt.Sprintf("✓ %d turns | $%.4f | %dms", event.NumTurns, event.CostUSD, event.DurationMS),
+				Text:       fmt.Sprintf("✓ %d turns | $%.4f | %s", event.NumTurns, event.CostUSD, formatDuration(event.DurationMS)),
 				CostUSD:    event.CostUSD,
 				NumTurns:   event.NumTurns,
 				DurationMS: event.DurationMS,
@@ -190,4 +190,29 @@ func truncateLines(s string, maxLines int) string {
 		return s
 	}
 	return strings.Join(lines[:maxLines], "\n") + "\n..."
+}
+
+// formatDuration formats milliseconds into a human-friendly string
+func formatDuration(ms int) string {
+	if ms < 1000 {
+		return fmt.Sprintf("%dms", ms)
+	}
+
+	seconds := float64(ms) / 1000
+	if seconds < 60 {
+		return fmt.Sprintf("%.1fs", seconds)
+	}
+
+	minutes := seconds / 60
+	if minutes < 60 {
+		return fmt.Sprintf("%.1fmin", minutes)
+	}
+
+	hours := minutes / 60
+	if hours < 24 {
+		return fmt.Sprintf("%.1fh", hours)
+	}
+
+	days := hours / 24
+	return fmt.Sprintf("%.1fd", days)
 }
