@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -71,12 +72,64 @@ func renderToolUse(event *model.DisplayEvent, width int) string {
 	}
 
 	toolName := toolNameStyle.Render("● " + tool.Name)
+	contentWidth := width - 6
+
+	// Special rendering for TodoWrite
+	if tool.Name == "TodoWrite" {
+		todoContent := renderTodoWriteInput(tool.Input, contentWidth)
+		if todoContent != "" {
+			return eventStyle.Width(width).Render(fmt.Sprintf("%s\n%s", toolName, todoContent))
+		}
+	}
+
 	input := tool.Input
 	if len(input) > 150 {
 		input = input[:150] + "..."
 	}
-	contentWidth := width - 6
 	return eventStyle.Width(width).Render(fmt.Sprintf("%s\n  %s", toolName, toolInputStyle.Width(contentWidth).Render(input)))
+}
+
+// todoItem represents a single todo from TodoWrite input
+type todoItem struct {
+	Content string `json:"content"`
+	Status  string `json:"status"`
+}
+
+// todoWriteInput represents the TodoWrite input structure
+type todoWriteInput struct {
+	Todos []todoItem `json:"todos"`
+}
+
+// renderTodoWriteInput renders TodoWrite todos with status icons
+func renderTodoWriteInput(input string, width int) string {
+	var data todoWriteInput
+	if err := json.Unmarshal([]byte(input), &data); err != nil {
+		return ""
+	}
+
+	if len(data.Todos) == 0 {
+		return ""
+	}
+
+	var lines []string
+	for _, todo := range data.Todos {
+		icon := "□" // pending
+		style := toolInputStyle
+		switch todo.Status {
+		case "in_progress":
+			icon = "◐"
+			style = textStyle
+		case "completed":
+			icon = "✓"
+			style = successStyle
+		}
+		content := todo.Content
+		if len(content) > width-6 {
+			content = content[:width-9] + "..."
+		}
+		lines = append(lines, fmt.Sprintf("  %s %s", icon, style.Render(content)))
+	}
+	return strings.Join(lines, "\n")
 }
 
 func renderUser(event *model.DisplayEvent, width int) string {

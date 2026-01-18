@@ -127,3 +127,111 @@ func TestRenderEventDispatchesCorrectly(t *testing.T) {
 		})
 	}
 }
+
+func TestRenderTodoWriteInput(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		contains []string
+		empty    bool
+	}{
+		{
+			name:     "all statuses",
+			input:    `{"todos":[{"content":"Task pending","status":"pending"},{"content":"Task in progress","status":"in_progress"},{"content":"Task done","status":"completed"}]}`,
+			contains: []string{"□", "Task pending", "◐", "Task in progress", "✓", "Task done"},
+		},
+		{
+			name:     "pending only",
+			input:    `{"todos":[{"content":"Do something","status":"pending"}]}`,
+			contains: []string{"□", "Do something"},
+		},
+		{
+			name:  "invalid json",
+			input: `{invalid json`,
+			empty: true,
+		},
+		{
+			name:  "empty todos array",
+			input: `{"todos":[]}`,
+			empty: true,
+		},
+		{
+			name:  "missing todos key",
+			input: `{"other":"data"}`,
+			empty: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := renderTodoWriteInput(tt.input, 80)
+
+			if tt.empty {
+				if result != "" {
+					t.Errorf("expected empty result, got: %s", result)
+				}
+				return
+			}
+
+			if result == "" {
+				t.Error("expected non-empty result")
+				return
+			}
+
+			for _, s := range tt.contains {
+				if !strings.Contains(result, s) {
+					t.Errorf("expected result to contain %q", s)
+				}
+			}
+		})
+	}
+}
+
+func TestRenderToolUseTodoWrite(t *testing.T) {
+	event := &model.DisplayEvent{
+		Type: "assistant",
+		ToolUse: &model.ToolUse{
+			Name:  "TodoWrite",
+			Input: `{"todos":[{"content":"First task","status":"pending"},{"content":"Second task","status":"in_progress"}]}`,
+		},
+	}
+
+	result := renderToolUse(event, 80)
+
+	if !strings.Contains(result, "TodoWrite") {
+		t.Error("expected tool name in output")
+	}
+	if !strings.Contains(result, "□") {
+		t.Error("expected pending icon □")
+	}
+	if !strings.Contains(result, "◐") {
+		t.Error("expected in_progress icon ◐")
+	}
+	if !strings.Contains(result, "First task") {
+		t.Error("expected first task content")
+	}
+	if !strings.Contains(result, "Second task") {
+		t.Error("expected second task content")
+	}
+}
+
+func TestRenderToolUseTodoWriteFallback(t *testing.T) {
+	// Invalid JSON should fallback to normal rendering
+	event := &model.DisplayEvent{
+		Type: "assistant",
+		ToolUse: &model.ToolUse{
+			Name:  "TodoWrite",
+			Input: `{invalid`,
+		},
+	}
+
+	result := renderToolUse(event, 80)
+
+	if !strings.Contains(result, "TodoWrite") {
+		t.Error("expected tool name in output")
+	}
+	// Should show raw input as fallback
+	if !strings.Contains(result, "{invalid") {
+		t.Error("expected fallback to raw input")
+	}
+}
