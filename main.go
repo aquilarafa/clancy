@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/aquila/clancy/ui"
 	"github.com/aquila/clancy/watcher"
@@ -63,27 +64,70 @@ func findFile() string {
 		}
 	}
 
-	// No file specified, look for *.jsonl in current directory
+	// No file specified, first check Claude sessions directory
+	if file := findClaudeSessionFile(); file != "" {
+		return file
+	}
+
+	// Fall back to looking for *.jsonl in current directory
 	matches, err := filepath.Glob("*.jsonl")
 	if err != nil || len(matches) == 0 {
 		return ""
 	}
 
-	// If multiple files, pick the most recently modified
-	if len(matches) == 1 {
-		return matches[0]
+	return findNewestFile(matches)
+}
+
+// findClaudeSessionFile looks for the most recent .jsonl in ~/.claude/projects/<project-dir>/
+func findClaudeSessionFile() string {
+	cwd, err := os.Getwd()
+	if err != nil {
+		return ""
+	}
+
+	// Convert path to Claude format: /Users/aquila/Projects/foo -> -Users-aquila-Projects-foo
+	projectDir := strings.ReplaceAll(cwd, "/", "-")
+	if !strings.HasPrefix(projectDir, "-") {
+		projectDir = "-" + projectDir
+	}
+
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return ""
+	}
+
+	claudeProjectPath := filepath.Join(homeDir, ".claude", "projects", projectDir)
+
+	// Check if directory exists
+	if _, err := os.Stat(claudeProjectPath); os.IsNotExist(err) {
+		return ""
+	}
+
+	// Find all .jsonl files in this directory
+	matches, err := filepath.Glob(filepath.Join(claudeProjectPath, "*.jsonl"))
+	if err != nil || len(matches) == 0 {
+		return ""
+	}
+
+	return findNewestFile(matches)
+}
+
+// findNewestFile returns the most recently modified file from a list
+func findNewestFile(files []string) string {
+	if len(files) == 1 {
+		return files[0]
 	}
 
 	var newest string
 	var newestTime int64
-	for _, match := range matches {
-		info, err := os.Stat(match)
+	for _, file := range files {
+		info, err := os.Stat(file)
 		if err != nil {
 			continue
 		}
 		if info.ModTime().Unix() > newestTime {
 			newestTime = info.ModTime().Unix()
-			newest = match
+			newest = file
 		}
 	}
 	return newest
