@@ -2,11 +2,9 @@
 
 ![Ralph and Chief Wiggum](https://static0.cbrimages.com/wordpress/wp-content/uploads/2021/01/The-Simpsons-Ralph-Chief-Wiggum-2.jpg?q=50&fit=crop&w=1232&h=693&dpr=1.5)
 
-Go TUI for viewing Claude Code Ralph sessions with live reload. Parses `--output-format stream-json` output.
+TUI for viewing Claude Code sessions with live reload.
 
 ## Installation
-
-### Build from source
 
 Requires Go 1.21+
 
@@ -14,24 +12,25 @@ Requires Go 1.21+
 git clone https://github.com/aquila/clancy.git
 cd clancy
 go build -o clancy
+sudo mv clancy /usr/local/bin/  # optional
 ```
 
-Optionally, move to your PATH:
+## Usage
 
 ```bash
-sudo mv clancy /usr/local/bin/
-```
-
-## Commands
-
-```bash
-# View a specific JSONL file
-clancy session.jsonl
-
-# Using --file flag
-clancy --file session.jsonl
-clancy -f session.jsonl
-
-# Auto-detect *.jsonl in current directory (picks most recent)
+# Inside any repo: automatically opens the most recent session
 clancy
+
+# Or specify a file
+clancy file.jsonl
 ```
+
+When run without arguments, Clancy searches for sessions in order:
+
+1. `~/.claude/projects/<current-repo>/` - saved Claude Code sessions
+2. `*.jsonl` in current directory
+
+## Keybindings
+
+- `↑/↓` or `j/k` - Navigate messages
+- `q` or `Ctrl+C` - Quit
